@@ -1,3 +1,4 @@
+cat > styles/style.css << 'EOF'
 /* Reset and base styles */
 * {
   margin: 0;
@@ -7,7 +8,7 @@
 
 body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  background: linear-gradient(135deg, #ffe6e6, #ffcccc); /* Red gradient background */
   color: #333;
 }
 
@@ -47,12 +48,13 @@ main {
 .question h2 {
   margin-bottom: 20px;
   font-size: 1.5em;
-  color: #007BFF;
+  color: #d10000; /* Change question text color to red */
 }
 
 .options {
   list-style: none;
   width: 100%;
+  padding: 0;
 }
 
 .options li {
@@ -62,11 +64,14 @@ main {
 .options label {
   display: flex;
   align-items: center;
-  background: #f0f0f0;
+  background: #ffe6e6; /* Light red background */
   padding: 15px;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s;
+  width: 100%; /* Ensure label fits within the container */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .options input {
@@ -74,20 +79,20 @@ main {
 }
 
 .options label:hover {
-  background: #e0e0e0;
+  background: #ff9999; /* Darker red on hover */
 }
 
 #progress {
   margin-top: 20px;
   width: 100%;
-  background: #e0e0e0;
+  background: #ffcccc; /* Light red */
   border-radius: 5px;
   overflow: hidden;
 }
 
 #progress-bar {
   height: 10px;
-  background: #007BFF;
+  background: #d10000; /* Red progress bar */
   width: 0%;
   transition: width 0.3s;
 }
@@ -103,7 +108,7 @@ main {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  background: #007BFF;
+  background: #d10000; /* Red button background */
   color: #fff;
   font-size: 1em;
   cursor: pointer;
@@ -111,7 +116,7 @@ main {
 }
 
 .btn:hover {
-  background: #0056b3;
+  background: #990000; /* Darker red on hover */
 }
 
 footer {
@@ -133,5 +138,6 @@ footer {
   text-align: center;
   margin-top: 10px;
   font-size: 1.2em;
-  color: #007BFF;
+  color: #d10000; /* Red text for slider value */
 }
+EOF
