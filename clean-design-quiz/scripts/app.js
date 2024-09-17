@@ -1,137 +1,104 @@
 const quizData = [
   {
+    question: "Do you already have a website?",
+    options: [
+      { text: "Yes (50% discount on add-ons)", value: 0.5 },
+      { text: "No (Full price for add-ons)", value: 1 },
+    ],
+    type: "radio",
+    name: "has_website",
+  },
+  {
     question: "What type of website are you interested in?",
     options: [
-      "Informational Website (e.g., company info, services)",
-      "E-commerce Store (sell products online)",
-      "Portfolio Website (showcase work/projects)",
-      "Blog or News Site (regular articles/posts)",
+      { text: "Start-up Service Website (£250)", value: 250 },
+      { text: "Start-up E-commerce Website (£600)", value: 600 },
+      { text: "Informational Website (£400)", value: 400 },
+      { text: "Comprehensive E-commerce Website (£1505)", value: 1505 },
+      { text: "Dynamic Service Business Website (£1020)", value: 1020 },
+      { text: "Portfolio Website (£800)", value: 800 },
+      { text: "Blog or News Site (£650)", value: 650 },
     ],
     type: "radio",
     name: "website_type",
   },
   {
-    question: "Do you currently have a website?",
-    options: ["Yes", "No"],
-    type: "radio",
-    name: "existing_website",
-  },
-  {
     question: "Do you have a logo and brand colors?",
     options: [
-      "Yes, I have both",
-      "I have a logo but need help with colors",
-      "No, I need help with both",
+      { text: "Yes (£0)", value: 0 },
+      { text: "No, need both (£25)", value: 25 },
+      { text: "No, need logo only (£15)", value: 15 },
     ],
     type: "radio",
     name: "branding",
   },
   {
-    question: "How many pages do you expect your website to have?",
+    question: "Do you need a content management system (CMS)?",
     options: [
-      "1-5 pages",
-      "6-10 pages",
-      "11-20 pages",
-      "More than 20 pages",
+      { text: "Yes (£100)", value: 100 },
+      { text: "No (£0)", value: 0 },
     ],
-    type: "radio",
-    name: "page_count",
-  },
-  {
-    question: "Do you need your website to be mobile-friendly?",
-    options: ["Yes", "No"],
-    type: "radio",
-    name: "mobile_friendly",
-  },
-  {
-    question: "Would you like to sell products or services directly from your website?",
-    options: ["Yes", "No"],
-    type: "radio",
-    name: "ecommerce",
-  },
-  {
-    question: "Do you require a content management system (CMS) to update your website yourself?",
-    options: ["Yes", "No", "Not sure, need advice"],
     type: "radio",
     name: "cms",
   },
   {
-    question: "Are you interested in search engine optimization (SEO) to improve your site's visibility on search engines?",
-    options: ["Yes", "No"],
+    question: "What level of SEO do you need?",
+    options: [
+      { text: "Basic SEO Package (£50)", value: 50 },
+      { text: "Advanced SEO Package (£150)", value: 150 },
+    ],
     type: "radio",
     name: "seo",
   },
   {
-    question: "Do you need help with creating content (text, images) for your website?",
+    question: "Do you need help with creating content (text, images)?",
     options: [
-      "Yes, need help with both text and images",
-      "Only need help with text",
-      "Only need help with images",
-      "No, I have all content ready",
+      { text: "Both text and images (£500)", value: 500 },
+      { text: "Text only (£300)", value: 300 },
+      { text: "Images only (£200)", value: 200 },
+      { text: "No (£0)", value: 0 },
     ],
     type: "radio",
     name: "content_creation",
   },
   {
-    question: "Would you like to integrate your social media accounts into the website?",
-    options: ["Yes", "No"],
+    question: "Would you like to integrate social media accounts?",
+    options: [
+      { text: "Yes (£0)", value: 0 },
+      { text: "No (£0)", value: 0 },
+    ],
     type: "radio",
     name: "social_media",
   },
   {
-    question: "Do you need multilingual support for your website?",
-    options: ["Yes, multiple languages", "No, English only"],
+    question: "Do you need multilingual support?",
+    options: [
+      { text: "Yes (£50)", value: 50 },
+      { text: "No (£0)", value: 0 },
+    ],
     type: "radio",
     name: "multilingual",
-  },
-  {
-    question: "What style of design do you prefer?",
-    options: [
-      "Modern and Minimalist",
-      "Bold and Colorful",
-      "Professional and Corporate",
-      "Creative and Artistic",
-    ],
-    type: "radio",
-    name: "design_style",
-  },
-  {
-    question: "Do you need any special features? (Select all that apply)",
-    options: [
-      "Contact Form",
-      "Live Chat",
-      "Booking System",
-      "Blog Section",
-      "Image or Video Gallery",
-    ],
-    type: "checkbox",
-    name: "special_features",
-  },
-  {
-    question: "What is your expected timeline for the project?",
-    options: [
-      "ASAP (1-2 weeks)",
-      "Short Term (3-6 weeks)",
-      "Flexible (No strict deadline)",
-    ],
-    type: "radio",
-    name: "timeline",
-  },
-  {
-    question: "Please select your approximate budget for this project:",
-    type: "range",
-    name: "budget",
-    min: 0,
-    max: 2000,
-  },
+  }
 ];
 
 let currentQuestion = 0;
 const totalQuestions = quizData.length;
 const answers = {};
+let basePrice = 0; // Holds the price of the selected website type
+let budget = 0; // Holds the add-ons' total
+let multiplier = 1; // Initialize the multiplier
+const previousSelections = {}; // Store previous selections for backtracking
 
 const quizContainer = document.getElementById("quiz-container");
 
+// Display budget function
+function displayBudget() {
+  const budgetContainer = document.getElementById("budget-container");
+  const totalBudget = (basePrice * multiplier) + (budget * multiplier); // Apply multiplier to both base price and add-ons
+  budgetContainer.innerHTML = `<h3>Estimated Budget: £${totalBudget.toFixed(2)}</h3>`;
+}
+
+// Load each question
 function loadQuestion(questionIndex) {
   const data = quizData[questionIndex];
   quizContainer.innerHTML = "";
@@ -143,63 +110,55 @@ function loadQuestion(questionIndex) {
   questionTitle.textContent = `${questionIndex + 1}. ${data.question}`;
   questionElement.appendChild(questionTitle);
 
-  if (data.type === "radio" || data.type === "checkbox") {
-    const optionsList = document.createElement("ul");
-    optionsList.classList.add("options");
+  const optionsList = document.createElement("ul");
+  optionsList.classList.add("options");
 
-    data.options.forEach((option, index) => {
-      const optionItem = document.createElement("li");
+  data.options.forEach((option) => {
+    const optionItem = document.createElement("li");
 
-      const label = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = data.type;
-      input.name = data.name;
-      input.value = option;
-
-      // Restore previous answers
-      if (answers[data.name]) {
-        if (data.type === "radio" && answers[data.name] === option) {
-          input.checked = true;
-        } else if (data.type === "checkbox" && answers[data.name].includes(option)) {
-          input.checked = true;
-        }
-      }
-
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(option));
-      optionItem.appendChild(label);
-      optionsList.appendChild(optionItem);
-    });
-
-    questionElement.appendChild(optionsList);
-  } else if (data.type === "range") {
-    const sliderContainer = document.createElement("div");
-    sliderContainer.classList.add("slider-container");
-
+    const label = document.createElement("label");
     const input = document.createElement("input");
-    input.type = "range";
+    input.type = data.type;
     input.name = data.name;
-    input.min = data.min;
-    input.max = data.max;
-    input.value = answers[data.name] || data.min;
+    input.value = option.value;
 
-    const valueDisplay = document.createElement("p");
-    valueDisplay.textContent = `£${input.value}`;
+    if (answers[data.name] && parseFloat(answers[data.name]) === option.value) {
+      input.checked = true;
+    }
 
-    input.addEventListener("input", () => {
-      valueDisplay.textContent = `£${input.value}`;
+    input.addEventListener("change", () => {
+      updateBudget(data.name, parseFloat(input.value));
     });
 
-    sliderContainer.appendChild(input);
-    sliderContainer.appendChild(valueDisplay);
-    questionElement.appendChild(sliderContainer);
-  }
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(option.text));
+    optionItem.appendChild(label);
+    optionsList.appendChild(optionItem);
+  });
 
+  questionElement.appendChild(optionsList);
   quizContainer.appendChild(questionElement);
   updateProgress();
   updateNavigation();
 }
 
+// Update budget based on user selection
+function updateBudget(name, newValue) {
+  if (name === "has_website") {
+    multiplier = newValue; // Set the multiplier for future calculations
+  } else if (name === "website_type") {
+    basePrice = newValue; // Set the base price without adding or subtracting anything
+  } else {
+    const previousValue = previousSelections[name] || 0;
+    // Adjust the add-ons budget by subtracting the previous value and adding the new one
+    budget = budget - previousValue + newValue;
+    previousSelections[name] = newValue; // Store the current selection
+  }
+
+  displayBudget(); // Update budget display
+}
+
+// Update progress bar
 function updateProgress() {
   let progressBar = document.getElementById("progress-bar");
   if (!progressBar) {
@@ -215,6 +174,7 @@ function updateProgress() {
   progressBar.style.width = `${progressPercent}%`;
 }
 
+// Navigation logic
 function updateNavigation() {
   let navigation = document.getElementById("navigation");
   if (!navigation) {
@@ -240,31 +200,30 @@ function updateNavigation() {
   }
 }
 
+// Collect answers and adjust budget when navigating next
 function collectAnswers() {
   const inputs = quizContainer.querySelectorAll("input");
   inputs.forEach((input) => {
-    if (input.type === "radio" || input.type === "range") {
-      if (input.checked || input.type === "range") {
-        answers[input.name] = input.value;
+    if (input.type === "radio" && input.checked) {
+      const currentValue = parseFloat(input.value);
+
+      if (input.name === "website_type") {
+        basePrice = currentValue; // Set the base price
+      } else if (input.name !== "has_website") { // Avoid affecting the budget with the multiplier selection
+        const previousValue = previousSelections[input.name] || 0;
+        // Adjust the add-ons budget
+        budget = budget - previousValue + currentValue;
+        previousSelections[input.name] = currentValue;
       }
-    } else if (input.type === "checkbox") {
-      if (!answers[input.name]) {
-        answers[input.name] = [];
-      }
-      if (input.checked) {
-        if (!answers[input.name].includes(input.value)) {
-          answers[input.name].push(input.value);
-        }
-      } else {
-        const index = answers[input.name].indexOf(input.value);
-        if (index > -1) {
-          answers[input.name].splice(index, 1);
-        }
-      }
+
+      answers[input.name] = input.value;
     }
   });
+
+  displayBudget(); // Update the budget display
 }
 
+// Navigate to the next question
 function nextQuestion() {
   collectAnswers();
   if (currentQuestion < totalQuestions - 1) {
@@ -275,13 +234,22 @@ function nextQuestion() {
   }
 }
 
+// Navigate to the previous question and adjust the budget
 function prevQuestion() {
+  const currentAnswer = previousSelections[quizData[currentQuestion].name] || 0;
+  if (quizData[currentQuestion].name !== "website_type") {
+    budget -= currentAnswer; // Remove add-on value from budget when going back
+  }
+
   if (currentQuestion > 0) {
     currentQuestion--;
     loadQuestion(currentQuestion);
   }
+
+  displayBudget(); // Update budget display
 }
 
+// Show summary after all questions
 function showSummary() {
   quizContainer.innerHTML = "<h2>Thank you for completing the quiz!</h2>";
   const summary = document.createElement("div");
@@ -290,14 +258,34 @@ function showSummary() {
   const summaryList = document.createElement("ul");
   for (const [key, value] of Object.entries(answers)) {
     const listItem = document.createElement("li");
-    listItem.textContent = `${key.replace(/_/g, ' ')}: ${Array.isArray(value) ? value.join(", ") : value}`;
+    listItem.textContent = `${key.replace(/_/g, ' ')}: £${value}`;
     summaryList.appendChild(listItem);
   }
   summary.appendChild(summaryList);
   quizContainer.appendChild(summary);
 
-  // You can add code here to send 'answers' to a server or email
+  // Display final budget
+  const finalBudget = document.createElement("h3");
+  const totalBudget = (basePrice * multiplier) + (budget * multiplier); // Apply the multiplier to both base price and add-ons
+  finalBudget.textContent = `Final Estimated Budget: £${totalBudget.toFixed(2)}`;
+  summary.appendChild(finalBudget);
+}
+
+// Function to initialize and start the quiz
+function initQuiz() {
+  const budgetContainer = document.createElement("div");
+  budgetContainer.id = "budget-container";
+
+  // Append the budget container and quiz container to #app
+  const appContainer = document.getElementById('app');
+  appContainer.appendChild(budgetContainer);
+  appContainer.appendChild(quizContainer); // Ensure quizContainer is part of the DOM
+
+  displayBudget(); // Display the initial budget
+  loadQuestion(currentQuestion); // Load the first question
 }
 
 // Start the quiz
-loadQuestion(currentQuestion);
+initQuiz();
+
+ 
