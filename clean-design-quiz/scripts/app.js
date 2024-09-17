@@ -44,7 +44,8 @@ const quizData = [
   {
     question: "What level of SEO do you need?",
     options: [
-      { text: "Basic SEO Package (£50)", value: 50 },
+      { text: "Basic SEO Package (£0)", value: 0 },
+      { text: "Intermediate  SEO Package (£50)", value: 50 },
       { text: "Advanced SEO Package (£150)", value: 150 },
     ],
     type: "radio",
@@ -53,9 +54,9 @@ const quizData = [
   {
     question: "Do you need help with creating content (text, images)?",
     options: [
-      { text: "Both text and images (£500)", value: 500 },
-      { text: "Text only (£300)", value: 300 },
-      { text: "Images only (£200)", value: 200 },
+      { text: "Both text and images (£130)", value: 130 },
+      { text: "Text only (£80)", value: 80 },
+      { text: "Images only (£50)", value: 50 },
       { text: "No (£0)", value: 0 },
     ],
     type: "radio",
@@ -84,21 +85,20 @@ const quizData = [
 let currentQuestion = 0;
 const totalQuestions = quizData.length;
 const answers = {};
-let basePrice = 0; // Holds the price of the selected website type
-let budget = 0; // Holds the add-ons' total
-let multiplier = 1; // Initialize the multiplier
-const previousSelections = {}; // Store previous selections for backtracking
+let basePrice = 0;
+let budget = 0;
+let multiplier = 1;
+const previousSelections = {};
 
 const quizContainer = document.getElementById("quiz-container");
 
 // Display budget function
 function displayBudget() {
+  const totalBudget = (basePrice * multiplier) + (budget * multiplier);
   const budgetContainer = document.getElementById("budget-container");
-  const totalBudget = (basePrice * multiplier) + (budget * multiplier); // Apply multiplier to both base price and add-ons
   budgetContainer.innerHTML = `<h3>Estimated Budget: £${totalBudget.toFixed(2)}</h3>`;
 }
 
-// Load each question
 function loadQuestion(questionIndex) {
   const data = quizData[questionIndex];
   quizContainer.innerHTML = "";
@@ -142,23 +142,20 @@ function loadQuestion(questionIndex) {
   updateNavigation();
 }
 
-// Update budget based on user selection
 function updateBudget(name, newValue) {
   if (name === "has_website") {
-    multiplier = newValue; // Set the multiplier for future calculations
+    multiplier = newValue; 
   } else if (name === "website_type") {
-    basePrice = newValue; // Set the base price without adding or subtracting anything
+    basePrice = newValue; 
   } else {
     const previousValue = previousSelections[name] || 0;
-    // Adjust the add-ons budget by subtracting the previous value and adding the new one
     budget = budget - previousValue + newValue;
-    previousSelections[name] = newValue; // Store the current selection
+    previousSelections[name] = newValue;
   }
 
-  displayBudget(); // Update budget display
+  displayBudget(); 
 }
 
-// Update progress bar
 function updateProgress() {
   let progressBar = document.getElementById("progress-bar");
   if (!progressBar) {
@@ -174,7 +171,6 @@ function updateProgress() {
   progressBar.style.width = `${progressPercent}%`;
 }
 
-// Navigation logic
 function updateNavigation() {
   let navigation = document.getElementById("navigation");
   if (!navigation) {
@@ -200,7 +196,6 @@ function updateNavigation() {
   }
 }
 
-// Collect answers and adjust budget when navigating next
 function collectAnswers() {
   const inputs = quizContainer.querySelectorAll("input");
   inputs.forEach((input) => {
@@ -208,10 +203,9 @@ function collectAnswers() {
       const currentValue = parseFloat(input.value);
 
       if (input.name === "website_type") {
-        basePrice = currentValue; // Set the base price
-      } else if (input.name !== "has_website") { // Avoid affecting the budget with the multiplier selection
+        basePrice = currentValue;
+      } else if (input.name !== "has_website") {
         const previousValue = previousSelections[input.name] || 0;
-        // Adjust the add-ons budget
         budget = budget - previousValue + currentValue;
         previousSelections[input.name] = currentValue;
       }
@@ -220,10 +214,9 @@ function collectAnswers() {
     }
   });
 
-  displayBudget(); // Update the budget display
+  displayBudget(); 
 }
 
-// Navigate to the next question
 function nextQuestion() {
   collectAnswers();
   if (currentQuestion < totalQuestions - 1) {
@@ -234,11 +227,10 @@ function nextQuestion() {
   }
 }
 
-// Navigate to the previous question and adjust the budget
 function prevQuestion() {
   const currentAnswer = previousSelections[quizData[currentQuestion].name] || 0;
   if (quizData[currentQuestion].name !== "website_type") {
-    budget -= currentAnswer; // Remove add-on value from budget when going back
+    budget -= currentAnswer; 
   }
 
   if (currentQuestion > 0) {
@@ -246,46 +238,97 @@ function prevQuestion() {
     loadQuestion(currentQuestion);
   }
 
-  displayBudget(); // Update budget display
+  displayBudget(); 
 }
 
-// Show summary after all questions
 function showSummary() {
   quizContainer.innerHTML = "<h2>Thank you for completing the quiz!</h2>";
   const summary = document.createElement("div");
   summary.classList.add("summary");
 
-  const summaryList = document.createElement("ul");
+  // Create table for detailed summary
+  const summaryTable = document.createElement("table");
+  summaryTable.classList.add("summary-table");
+
+  const tableHeader = `<tr>
+                         <th>Feature</th>
+                         <th>Cost</th>
+                         <th>Action</th>
+                       </tr>`;
+  summaryTable.innerHTML = tableHeader;
+
   for (const [key, value] of Object.entries(answers)) {
-    const listItem = document.createElement("li");
-    listItem.textContent = `${key.replace(/_/g, ' ')}: £${value}`;
-    summaryList.appendChild(listItem);
+    // Skip 'has_website' in the summary
+    if (key === 'has_website') continue;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${key.replace(/_/g, ' ')}</td><td>£${value}</td>`;
+
+    // Add a delete button to remove feature
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Remove";
+    deleteButton.classList.add("btn", "delete-btn");
+    deleteButton.addEventListener("click", () => removeFeature(key));
+    const actionCell = document.createElement("td");
+    actionCell.appendChild(deleteButton);
+    row.appendChild(actionCell);
+
+    summaryTable.appendChild(row);
   }
-  summary.appendChild(summaryList);
+
+  summary.appendChild(summaryTable);
   quizContainer.appendChild(summary);
 
   // Display final budget
   const finalBudget = document.createElement("h3");
-  const totalBudget = (basePrice * multiplier) + (budget * multiplier); // Apply the multiplier to both base price and add-ons
+  const totalBudget = (basePrice * multiplier) + (budget * multiplier);
   finalBudget.textContent = `Final Estimated Budget: £${totalBudget.toFixed(2)}`;
   summary.appendChild(finalBudget);
+
+  // Create a button to download the summary
+  const downloadButton = document.createElement("button");
+  downloadButton.textContent = "Download Detailed Summary";
+  downloadButton.classList.add("btn", "download-btn");
+  downloadButton.addEventListener("click", () => downloadSummary(totalBudget));
+  summary.appendChild(downloadButton);
 }
 
-// Function to initialize and start the quiz
+// Function to remove a feature and update budget
+function removeFeature(feature) {
+  const previousValue = previousSelections[feature] || 0;
+  budget -= previousValue; // Adjust budget
+  delete answers[feature]; // Remove feature from answers
+  delete previousSelections[feature]; // Remove feature from selections
+  showSummary(); // Refresh summary
+}
+
+// Function to download the summary
+function downloadSummary(totalBudget) {
+  let summaryContent = "Website Quoting Tool - Detailed Summary\n\n";
+  for (const [key, value] of Object.entries(answers)) {
+    summaryContent += `${key.replace(/_/g, ' ')}: £${value}\n`;
+  }
+  summaryContent += `\nFinal Estimated Budget: £${totalBudget.toFixed(2)}`;
+  summaryContent += "\n\nNote: This summary includes all selected features with their respective costs for your custom website project.";
+
+  const blob = new Blob([summaryContent], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Website_Quote_Summary.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function initQuiz() {
+  const appContainer = document.getElementById('app');
   const budgetContainer = document.createElement("div");
   budgetContainer.id = "budget-container";
-
-  // Append the budget container and quiz container to #app
-  const appContainer = document.getElementById('app');
   appContainer.appendChild(budgetContainer);
-  appContainer.appendChild(quizContainer); // Ensure quizContainer is part of the DOM
+  appContainer.appendChild(quizContainer);
 
-  displayBudget(); // Display the initial budget
-  loadQuestion(currentQuestion); // Load the first question
+  displayBudget();
+  loadQuestion(currentQuestion);
 }
 
-// Start the quiz
 initQuiz();
-
- 

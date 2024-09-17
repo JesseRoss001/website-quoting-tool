@@ -5,22 +5,27 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clean Design UK - Website Quoting Tool</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="styles/style.css" />
 </head>
 <body>
-  <div id="app">
-    <header>
-      <img src="images/logo.png" alt="Clean Design UK Logo" />
+  <div id="app" class="container my-5">
+    <header class="text-center mb-5">
+      <img src="https://res.cloudinary.com/dz18uvfpa/image/upload/v1716203082/tge3nz3lwlahqfg163md.webp" alt="Clean Design UK Logo" class="logo img-fluid mb-3" />
+      <h1 class="display-4">Clean Design UK Website Quoting Tool</h1>
     </header>
-    <main>
-      <div id="quiz-container">
-        <!-- Quiz content will be injected here by app.js -->
-      </div>
+  
+    <main id="quiz-container" class="bg-white p-5 rounded shadow-lg">
+      <!-- Quiz content will be injected here by app.js -->
     </main>
-    <footer>
-      <p>&copy; 2023 Clean Design UK</p>
+    
+    <footer class="text-center mt-5">
+      <p>&copy; 2024 Clean Design UK</p>
     </footer>
   </div>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="scripts/app.js"></script>
 </body>
 </html>
